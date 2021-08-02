@@ -19,12 +19,31 @@ from sklearn.metrics import classification_report, precision_recall_fscore_suppo
 
 
 def load_data(messages_filepath, categories_filepath):
+    """ 
+    Function to import the data needed to train the classifier model.
+    This function takes as imputs strings that denote where the .csv files that contain the messages and their corresponding categories.
+    The output is a dataframe of these two .csvs merged together using the field 'id'
+    """
     messages = pd.read_csv(messages_filepath)
     categories = pd.read_csv(categories_filepath)
     df = messages.merge(categories, how='inner', on='id')
     return df
 
 def clean_data(df):
+    """ 
+    Function to wrangle and clean the data contained in the dataframe df (output of load_data).
+    
+    This function takes as imput the name of the dataframe containing the raw message and categories data, which is then processed as follows:
+        1. Observations in the categories column is split into it's constituent categories
+        2. The name of each category extracted into a series of category names (category_colnames)
+        3. The columns of the expanded categories data is then renamed to match the category names
+        4. The data in the categories columns is then truncated to be only the final character of the string - a flag either 0 or 1. 
+        5. This flag is then cast as a numeric data type.
+        6. Anomalies are also dealt with such as any categories with a value that is neither 0 or 1. In this case the anomaly is replaced with the mode of the column
+        7. The original categories column is dropped from the dataframe and the new, separated columns are joined on.
+        
+    The output is a dataframe of the messages, and the wrangled category flags.
+    """
     categories = df['categories'].str.split(';',expand=True)
     row = categories.iloc[1,:]
     category_colnames = row.apply(lambda x: x[0:-2])
@@ -54,6 +73,11 @@ def clean_data(df):
     
 
 def save_data(df, database_filename):
+    """
+    Function to create an SQLite database and save the prepared data to it.
+    Inputs are the dataframe to save (output of clean_data(df)) and the name of the database.
+    Function has no output but saves the dataframe to the database.
+    """
     engine = create_engine(f'sqlite:///{database_filename}') #.db
     sql = 'DROP TABLE IF EXISTS cleaned_messages_categories;'
     result = engine.execute(sql)
@@ -61,6 +85,9 @@ def save_data(df, database_filename):
 
 
 def main():
+    """
+    Runs the above functions, given the input arguments from the system, in the correct order to prepare the data for modelling.
+    """
     if len(sys.argv) == 4:
 
         messages_filepath, categories_filepath, database_filepath = sys.argv[1:]
