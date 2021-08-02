@@ -16,14 +16,22 @@ from sqlalchemy import create_engine
 app = Flask(__name__)
 
 def tokenize(text):
+    """
+    As in train_classifier.py, this function is for lemmatizing, cleaning and removing stopwords from text, this time input by the user. 
+    Input is the text to be processed, output is the clean, lemmatized tokens.
+    """
+    text = re.sub(r"[^a-zA-Z0-9]", " ", text.lower())
     tokens = word_tokenize(text)
     lemmatizer = WordNetLemmatizer()
-
+    stop_words = stopwords.words("english")
+    
     clean_tokens = []
     for tok in tokens:
-        clean_tok = lemmatizer.lemmatize(tok).lower().strip()
-        clean_tokens.append(clean_tok)
-
+        if tok not in stop_words:
+            clean_tok = lemmatizer.lemmatize(tok).lower().strip()
+            if clean_tok not in clean_tokens:
+                clean_tokens.append(clean_tok)
+                
     return clean_tokens
 
 # load data
@@ -39,6 +47,9 @@ model = joblib.load("models/classifier.pkl")
 @app.route('/')
 @app.route('/index')
 def index():
+    """
+    Function to be run on the home or 'index' page of the webapp, showing the visualisations of the training dataset.
+    """
     
     # extract data needed for visuals
     # TODO: Below is an example - modify to extract data for your own visuals
@@ -108,6 +119,9 @@ def index():
 # web page that handles user query and displays model results
 @app.route('/go')
 def go():
+    """
+    Function to be run on the go page of the webapp, when a user inputs a custom message to be classified. Here the tokenizer and model are called and the predictions shown.
+    """
     # save user input in query
     query = request.args.get('query', '') 
 
