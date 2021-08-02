@@ -20,6 +20,14 @@ from sklearn.metrics import classification_report, precision_recall_fscore_suppo
 
 
 def load_data(database_filepath):
+    """
+    Function to import the data prepared in process_data.py from the SQLite database.
+    Takes as input the database name and filepath.
+    Outputs:
+        1. the message column (as a series) as X,
+        2. the categories columns (as a df) as Y,
+        3. the category names as a column index
+    """
     engine = create_engine(f'sqlite:///{database_filepath}')#.db
     df = pd.read_sql_table('cleaned_messages_categories', engine)
     X = df['message']
@@ -29,6 +37,10 @@ def load_data(database_filepath):
     return X, Y, category_names
 
 def tokenize(text):
+    """
+    Function to lemmatize, clean and remove stopwords from a given input of text. 
+    Input is the text to be processed, output is the clean, lemmatized tokens.
+    """
     text = re.sub(r"[^a-zA-Z0-9]", " ", text.lower())
     tokens = word_tokenize(text)
     lemmatizer = WordNetLemmatizer()
@@ -44,7 +56,17 @@ def tokenize(text):
     return clean_tokens
 
 
-def build_model():    
+def build_model():  
+    """
+    Function to instansiate and apply a pipeline to train a model.
+    
+    Pipeline carries out the following steps accross a GridSearchCV to find the optimal estimator (RF) depth:
+        1. Tokenizes the input text data and applies CountVectorizer
+        2. Takes the output of CountVectorizer and applies TfidfTransformer()
+        3. Trains a MultiOutputClassifier using a RandomForestClassifier
+    
+    Output is the trained GridSearchCV object.
+    """
     pipeline = Pipeline([
         ('vect', CountVectorizer(tokenizer=tokenize)),
         ('tfidf', TfidfTransformer()),
@@ -62,6 +84,13 @@ def build_model():
 
 
 def evaluate_model(model, X_test, Y_test, category_names):
+    """
+    Function to output the f1 score, precision and recall of all categories for the test set.
+    
+    Input is the trained model, the X and Y of the test set and the names of the categories.
+    
+    Ouput (both returned and printed in the command line) is a dataframe of the performance metrics (colums) for each category (rows).
+    """
     
 #     model = cv.best_estimator_
     
@@ -84,6 +113,10 @@ def evaluate_model(model, X_test, Y_test, category_names):
 
 
 def save_model(model, model_filepath):
+    """
+    Function to export the trained model as a .pkl file to a specified location.
+    Inputs are the model and the location to save to. 
+    """
     # Export model as a pickle file
     import pickle
     pickle.dump(model, open(model_filepath, 'wb'))
@@ -91,6 +124,9 @@ def save_model(model, model_filepath):
 
 
 def main():
+    """
+    Function to run the script when called from the command line in the correct order with the correct arguments passed to each function.
+    """
     if len(sys.argv) == 3:
         database_filepath, model_filepath = sys.argv[1:]
         print('Loading data...\n    DATABASE: {}'.format(database_filepath))
