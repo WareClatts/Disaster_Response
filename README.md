@@ -1,6 +1,10 @@
 # Disaster Response Pipeline Project
 Project 2 of Udacity Data Science nanodegree
 
+### Summary of the project:
+This project is part of the Udacity Data Scientist nanodegree and uses data provided by Figure Eight (https://www.figure-eight.com/) to train a multi-output classifier model to automatically classify disaster messages, as well as to create an infromative and interactive web app that where a user can view information about the training data and classify their own messages. 
+The trained model is deployed in order that the messages sent during disasters get to the appropriate disaster relief agency without having to be read and checked by humans, which takes too long given the volume of messages typically recieved, at a time when the agencies are busiest.
+
 ### Instructions:
 1. Run the following commands in the project's root directory to set up your database and model.
 
@@ -17,7 +21,7 @@ Project 2 of Udacity Data Science nanodegree
 ### Folders:
 1. data contains: 
     - Training data for classification model:
-        -  one csv of messages (disaster_messages.csv)
+        -  one csv of messages (disaster_messages.csv) - these are real messages that were sent during disaster events
         -  one of categories that the messages correspond to (disaster_categories.csv)
     - Data processing script process_data.py. This script takes the above csv files as inputs, cleans/tokenizes and combines them before saving to a SQLite database.
     - SQLite Database DisasterResponse.db which contains the data output by the process_data.py script.
